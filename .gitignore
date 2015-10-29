@@ -27,4 +27,5 @@ target
 bin/
 tmp/
 gradlew
+gradle
 src/main/webapp/resource/temp/
