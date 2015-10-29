@@ -1,9 +1,11 @@
 package com.example.service;
 
 import com.example.entity.Member;
-import com.example.entity.Phone;
+import com.example.entity.Team;
 import com.example.repository.MemberRepository;
-import com.example.repository.PhoneRepository;
+import com.example.repository.TeamRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,62 +15,56 @@ import java.util.List;
 @Service
 public class RepositoryServiceImpl implements RepositoryService {
 
+	Logger logger = LoggerFactory.getLogger(RepositoryServiceImpl.class);
+
 	@Autowired
 	private MemberRepository memberRepository;
-	
+
 	@Autowired
-	private PhoneRepository phoneRepository;
-	
-	public void saveMember(){
-		Member first = new Member("Jung");
-		Member second = new Member("Dong");
-		Member third = new Member("Min");
-		
-		Phone p = new Phone(second, "010-XXXX-YYYY");
+	private TeamRepository teamRepository;
 
+	public void saveMember() {
+		Team team1 = new Team("발리팀");
+		Team team2 = new Team("흑산도");
+		Team team3 = new Team("이어도");
+
+		Member first = new Member(team2, "이남희");
+
+		teamRepository.save(team1);
+		teamRepository.save(team2);
+		teamRepository.save(team3);
 		memberRepository.save(first);
-		memberRepository.save(second);
-		memberRepository.save(third);
+	}
 
-		phoneRepository.save(p);
-	}
-	
-	public void print(){
-		// @ManyToOne의 fetch 기본전략은 EAGER이다.
-		// 따라서 @Transactional 어노테이션이 없더라도
-		// 기본적으로 전부 데이터를 적재한다.
-		List<Phone> phone = phoneRepository.findAll();
-		for( Phone p : phone ){
-			System.out.println(p.toString()+ " " + p.getMember().toString());
-		}
-	}
-	
-	@Transactional
-	public void lazyPrint(){
-		// @OneToMany의 fetch 기본전략은 LAZY이다.		
-		// 따라서 Member Entity 내부의 Phone 콜렉션은 
-		// LAZY 전략이기 때문에 @Transactional 어노테이션이 있어야 한다.
-		List<Member> member = memberRepository.findAll();
-		for( Member m : member ) {
-			System.out.println(m.toString());
-			for( Phone e : m.getPhone() ){
-				System.out.println(e.toString());
+	@Transactional // Team 의 내부 컬랙션이 Lazy 전략이기 때문에 Transactional 이 적용 되어야 한다.
+	public void print() {
+		List<Team> teams = teamRepository.findAll();
+
+		for (Team team : teams) {
+			System.out.printf("#####################################");
+			System.out.println("## team = " + team);
+
+			for (Member lazyMember : team.getMember()) {
+				System.out.println("-----------------------------------");
+				System.out.println("## lazyMember : " + lazyMember);
 			}
 		}
 	}
-	
-	public void lazyPrint2(){
-		// Entity가 LAZY 전략일지라도 
-		// LAZY 전략을 쓰는 객체를 사용하지 않는다면
-		// @Transactional 어노테이션이 없어도 된다.
+
+	public void lazyEntityPrint() {
+		// Lazy 엔티티를 호출하지 않으므로 @Transactional 어노테이션이 없어도 된다.
 		List<Member> member = memberRepository.findAll();
-		for( Member m : member ) {
-			System.out.println(m.toString());
+		for (Member lazyMember : member) {
+			System.out.println("===============================");
+			System.out.println("## lazyMember : " + lazyMember);
 		}
 	}
 
-	public void deletAll() {
-		memberRepository.deleteAll();
-		phoneRepository.deleteAll();
-	}	
+	public void deletConstraintKey() {
+		// team과 member간에 양방향 관계 constraint 를 삭제하기 위해 team을 지워준다.
+		// member 는 부모의 키가 삭제 될때 같이 삭제 되어야 한다.
+		teamRepository.deleteAll();
+		System.out.println("@@@@@@ 삭제 완료");
+	}
+
 }

@@ -20,22 +20,24 @@ public class Member {
     @Column(name = "name")
     private String name;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "member")
-    private Collection<Phone> phone;
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "team_seq")  // @ManyToOne의 fetch 기본전략은 EAGER이다.
+	private Team team;
 
-    public Member() {
-    }
+	public Member() {
+	}
 
-    public Member(String name) {
-        this.name = name;
-    }
+	public Member(Team team, String name) {
+		this.team = team;
+		this.name = name;
+	}
 
     public int getSeq() {
         return seq;
     }
 
-    public void setSeq(int id) {
-        this.seq = id;
+    public void setSeq(int seq) {
+        this.seq = seq;
     }
 
     public String getName() {
@@ -46,25 +48,17 @@ public class Member {
         this.name = name;
     }
 
-    public Collection<Phone> getPhone() {
-        if (phone == null) {
-            phone = new ArrayList<Phone>();
-        }
-        return phone;
-    }
+	public Team getTeam() {
+		return team;
+	}
 
-    public void addPhone(Phone p) {
-        Collection<Phone> phone = getPhone();
-        phone.add(p);
-    }
+	public void setTeam(Team team) {
+		this.team = team;
+	}
 
-    public void setPhone(Collection<Phone> phone) {
-        this.phone = phone;
-    }
-
-    @Override
+	@Override
     public String toString() {
-        String result = "[member_" + seq + "] " + name;
+        String result = "[member_" + seq + "] : " + name;
         return result;
     }
 

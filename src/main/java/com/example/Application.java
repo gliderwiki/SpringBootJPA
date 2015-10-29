@@ -23,10 +23,11 @@ public class Application implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        repositoryService.deletAll();
         repositoryService.saveMember();
-        repositoryService.print();
-        repositoryService.lazyPrint();
-        repositoryService.lazyPrint2();
+	    repositoryService.print();
+	    repositoryService.lazyEntityPrint();
+
+	    repositoryService.deletConstraintKey();
+	    repositoryService.print();
     }
 }
